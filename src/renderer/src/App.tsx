@@ -83,9 +83,9 @@ export default function App() {
 
       <FooterWrapper>
         <Footer>
-          <MotionDiv>
+          {/* <MotionDiv>
             <Plus width={16} height={16} color={theme.colors.colorTextTertiary} />
-          </MotionDiv>
+          </MotionDiv> */}
           <FooterRight>
             <MotionDiv onClick={togglePin}>
               <Pin
@@ -94,8 +94,8 @@ export default function App() {
                 color={isPinned ? theme.colors.colorPrimary : theme.colors.colorTextTertiary}
               />
             </MotionDiv>
-            <CalendarDays width={16} height={16} color={theme.colors.colorTextTertiary} />
-            <Cog width={16} height={16} color={theme.colors.colorTextTertiary} />
+            {/* <CalendarDays width={16} height={16} color={theme.colors.colorTextTertiary} />
+            <Cog width={16} height={16} color={theme.colors.colorTextTertiary} /> */}
           </FooterRight>
         </Footer>
       </FooterWrapper>

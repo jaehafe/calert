@@ -60,22 +60,18 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  createTray()
+})
+
+function createTray() {
   const trayIconImage = nativeImage.createFromPath(TrayIcon)
   const resizedTrayIcon = trayIconImage.resize({ width: 16, height: 16 })
   tray = new Tray(resizedTrayIcon)
 
-  // const contextMenu = Menu.buildFromTemplate([
-  //   { label: '환경설정', click: () => showWindow() },
-  //   { type: 'separator' },
-  //   { label: 'Item1', type: 'radio' },
-  //   { label: 'Item2', type: 'radio' },
-  //   { label: 'Item3', type: 'radio', checked: true },
-  //   { label: 'Item4', type: 'radio' },
-  //   { type: 'separator' },
-  //   { label: '종료', click: () => app.quit() }
-  // ])
-  // tray.setToolTip('This is my application.')
-  // tray.setContextMenu(contextMenu)
+  const contextMenu = Menu.buildFromTemplate([{ label: '종료', click: () => app.quit() }])
+
+  tray.setToolTip('Your Application Name')
+
   tray.on('click', (event, bounds) => {
     if (!calendarWindow) {
       createCalendarWindow()
@@ -90,7 +86,11 @@ app.whenReady().then(() => {
     })
     calendarWindow!.show()
   })
-})
+
+  tray.on('right-click', (event, bounds) => {
+    tray?.popUpContextMenu(contextMenu)
+  })
+}
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -124,7 +124,8 @@ function createCalendarWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
       contextIsolation: false
-    }
+    },
+    icon: TrayIcon
   })
 
   if (process.env.NODE_ENV === 'development') {
