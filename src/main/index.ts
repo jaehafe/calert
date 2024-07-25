@@ -112,8 +112,11 @@ app.on('activate', function () {
 
 function createCalendarWindow(): void {
   calendarWindow = new BrowserWindow({
-    minWidth: 170,
-    minHeight: 250,
+    width: 180,
+    height: 200,
+    maxWidth: 180,
+    minHeight: 200,
+    maxHeight: 400,
     show: false,
     frame: false,
     resizable: false,
@@ -142,6 +145,12 @@ function createCalendarWindow(): void {
     if (calendarWindow) {
       isPinned = shouldPin
       calendarWindow.setAlwaysOnTop(shouldPin)
+    }
+  })
+
+  ipcMain.on('resize-calendar', (_, size) => {
+    if (calendarWindow) {
+      calendarWindow.setSize(size.width, size.height)
     }
   })
 }

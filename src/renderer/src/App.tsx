@@ -11,8 +11,15 @@ import { MotionDiv, whileHoverEffect } from './components/ui/MotionHtml'
 import { Calendar, CalendarDays, ChevronLeft, ChevronRight, Cog, Pin, Plus } from 'lucide-react'
 
 export default function App() {
-  const { currentDate, daysInMonth, firstDayOfMonth, moveToToday, nextMonth, prevMonth } =
-    useCalendar()
+  const {
+    containerRef,
+    currentDate,
+    daysInMonth,
+    firstDayOfMonth,
+    moveToToday,
+    nextMonth,
+    prevMonth
+  } = useCalendar()
   const { isPinned, togglePin } = usePin()
 
   const renderCalendar = () => {
@@ -31,7 +38,7 @@ export default function App() {
   }
 
   return (
-    <CalendarContainer>
+    <CalendarContainer ref={containerRef}>
       {/* header */}
       <CalendarHeader>
         <MonthYear>{currentDate.format('MMM YYYY')}</MonthYear>
@@ -60,17 +67,19 @@ export default function App() {
         </HeaderRight>
       </CalendarHeader>
 
-      <CalendarContent>
-        {/* 요알 */}
-        <WeekDays>
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-            <WeekDay key={day}>{day}</WeekDay>
-          ))}
-        </WeekDays>
+      <CalendarContentWrapper>
+        <CalendarContent>
+          {/* 요알 */}
+          <WeekDays>
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+              <WeekDay key={day}>{day}</WeekDay>
+            ))}
+          </WeekDays>
 
-        {/* 날짜 */}
-        <DaysGrid>{renderCalendar()}</DaysGrid>
-      </CalendarContent>
+          {/* 날짜 */}
+          <DaysGrid>{renderCalendar()}</DaysGrid>
+        </CalendarContent>
+      </CalendarContentWrapper>
 
       <FooterWrapper>
         <Footer>
@@ -98,8 +107,8 @@ const BackgroundColor = '#1A1721'
 const TextColor = `rgba(255, 255, 255, 0.87)`
 
 const CalendarContainer = styled.div`
-  width: 170px;
-  height: 250px;
+  max-width: 180px;
+  height: 100%;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -128,10 +137,15 @@ const HeaderRight = styled.div`
   align-items: center;
 `
 
+const CalendarContentWrapper = styled.div`
+  height: 230px;
+`
 const CalendarContent = styled.div`
+  width: 100%;
+
+  overflow: hidden;
   border: 1px solid white;
   border-radius: 0.8rem;
-  overflow: hidden;
 `
 
 const MonthYear = styled.div`
@@ -161,8 +175,6 @@ const DaysGrid = styled.div`
 `
 
 const Day = styled.div<{ isToday?: boolean }>`
-  /* margin: 2px;
-  padding: 4px; */
   padding: 4px;
 
   text-align: center;

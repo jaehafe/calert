@@ -1,7 +1,8 @@
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export default function useCalendar() {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [currentDate, setCurrentDate] = useState(dayjs())
 
   const daysInMonth = currentDate.daysInMonth()
@@ -33,6 +34,21 @@ export default function useCalendar() {
     }
   }, [handleKeyDown])
 
+  const resizeWindow = useCallback(() => {
+    if (containerRef.current) {
+      const height = containerRef.current.clientHeight
+      window.electron.ipcRenderer.send('resize-calendar', { width: 180, height })
+    }
+  }, [])
+
+  useEffect(() => {
+    resizeWindow()
+  }, [resizeWindow])
+
+  useEffect(() => {
+    resizeWindow()
+  }, [currentDate, resizeWindow])
+
   const moveToToday = () => {
     setCurrentDate(dayjs())
   }
@@ -44,6 +60,7 @@ export default function useCalendar() {
     firstDayOfMonth,
     moveToToday,
     prevMonth,
-    nextMonth
+    nextMonth,
+    containerRef
   }
 }
