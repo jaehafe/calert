@@ -112,8 +112,8 @@ app.on('activate', function () {
 
 function createCalendarWindow(): void {
   calendarWindow = new BrowserWindow({
-    width: 170,
-    height: 250,
+    minWidth: 170,
+    minHeight: 250,
     show: false,
     frame: false,
     resizable: false,
@@ -130,7 +130,18 @@ function createCalendarWindow(): void {
     calendarWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
+  let isPinned = false
+
   calendarWindow.on('blur', () => {
-    calendarWindow?.hide()
+    if (!isPinned) {
+      calendarWindow?.hide()
+    }
+  })
+
+  ipcMain.on('toggle-pin', (_, shouldPin) => {
+    if (calendarWindow) {
+      isPinned = shouldPin
+      calendarWindow.setAlwaysOnTop(shouldPin)
+    }
   })
 }

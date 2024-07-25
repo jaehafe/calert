@@ -1,41 +1,19 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import styled from 'styled-components'
-import dayjs from 'dayjs'
-import { MotionDiv, whileHoverEffect } from './components/ui/MotionHtml'
-import { Calendar, CalendarDays, ChevronLeft, ChevronRight, Cog, Pin, Plus } from 'lucide-react'
 import theme from './styles/theme'
 
+import dayjs from 'dayjs'
+
+import useCalendar from './hooks/useCalendar'
+import usePin from './hooks/usePin'
+
+import { MotionDiv, whileHoverEffect } from './components/ui/MotionHtml'
+import { Calendar, CalendarDays, ChevronLeft, ChevronRight, Cog, Pin, Plus } from 'lucide-react'
+
 export default function App() {
-  const [currentDate, setCurrentDate] = useState(dayjs())
-
-  const daysInMonth = currentDate.daysInMonth()
-  const firstDayOfMonth = currentDate.startOf('month').day()
-
-  const prevMonth = useCallback(() => {
-    setCurrentDate((prev) => prev.subtract(1, 'month'))
-  }, [])
-
-  const nextMonth = useCallback(() => {
-    setCurrentDate((prev) => prev.add(1, 'month'))
-  }, [])
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft') {
-        prevMonth()
-      } else if (event.key === 'ArrowRight') {
-        nextMonth()
-      }
-    },
-    [prevMonth, nextMonth]
-  )
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [handleKeyDown])
+  const { currentDate, daysInMonth, firstDayOfMonth, moveToToday, nextMonth, prevMonth } =
+    useCalendar()
+  const { isPinned, togglePin } = usePin()
 
   const renderCalendar = () => {
     const days: ReactNode[] = []
@@ -50,10 +28,6 @@ export default function App() {
       )
     }
     return days
-  }
-
-  const moveToToday = () => {
-    setCurrentDate(dayjs())
   }
 
   return (
@@ -86,29 +60,42 @@ export default function App() {
         </HeaderRight>
       </CalendarHeader>
 
-      {/* 요알 */}
-      <WeekDays>
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-          <WeekDay key={day}>{day}</WeekDay>
-        ))}
-      </WeekDays>
+      <CalendarContent>
+        {/* 요알 */}
+        <WeekDays>
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+            <WeekDay key={day}>{day}</WeekDay>
+          ))}
+        </WeekDays>
 
-      {/* 날짜 */}
-      <DaysGrid>{renderCalendar()}</DaysGrid>
+        {/* 날짜 */}
+        <DaysGrid>{renderCalendar()}</DaysGrid>
+      </CalendarContent>
 
-      <Footer>
-        <MotionDiv>
-          <Plus width={16} height={16} color={theme.colors.colorTextTertiary} />
-        </MotionDiv>
-        <FooterRight>
-          <Pin width={16} height={16} color={theme.colors.colorTextTertiary} />
-          <CalendarDays width={16} height={16} color={theme.colors.colorTextTertiary} />
-          <Cog width={16} height={16} color={theme.colors.colorTextTertiary} />
-        </FooterRight>
-      </Footer>
+      <FooterWrapper>
+        <Footer>
+          <MotionDiv>
+            <Plus width={16} height={16} color={theme.colors.colorTextTertiary} />
+          </MotionDiv>
+          <FooterRight>
+            <MotionDiv onClick={togglePin}>
+              <Pin
+                width={16}
+                height={16}
+                color={isPinned ? theme.colors.colorPrimary : theme.colors.colorTextTertiary}
+              />
+            </MotionDiv>
+            <CalendarDays width={16} height={16} color={theme.colors.colorTextTertiary} />
+            <Cog width={16} height={16} color={theme.colors.colorTextTertiary} />
+          </FooterRight>
+        </Footer>
+      </FooterWrapper>
     </CalendarContainer>
   )
 }
+
+const BackgroundColor = '#1A1721'
+const TextColor = `rgba(255, 255, 255, 0.87)`
 
 const CalendarContainer = styled.div`
   width: 170px;
@@ -119,9 +106,11 @@ const CalendarContainer = styled.div`
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  background-color: rgba(40, 40, 40, 0.95);
-  color: rgba(255, 255, 255, 0.87);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  background-color: ${BackgroundColor};
+  color: ${TextColor};
+
+  padding: 0.6rem;
 `
 
 const CalendarHeader = styled.div`
@@ -130,7 +119,7 @@ const CalendarHeader = styled.div`
   align-items: center;
 
   padding: 5px;
-  background-color: rgba(20, 30, 10, 0.95);
+  background-color: ${BackgroundColor};
 `
 
 const HeaderRight = styled.div`
@@ -139,10 +128,16 @@ const HeaderRight = styled.div`
   align-items: center;
 `
 
+const CalendarContent = styled.div`
+  border: 1px solid white;
+  border-radius: 0.8rem;
+  overflow: hidden;
+`
+
 const MonthYear = styled.div`
   font-weight: bold;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.95);
+  color: ${TextColor};
 `
 
 const WeekDays = styled.div`
@@ -155,7 +150,7 @@ const WeekDay = styled.div`
   text-align: center;
   padding: 2px 0;
   font-weight: bold;
-  color: rgba(255, 255, 255, 0.6);
+  color: ${TextColor};
 `
 
 const DaysGrid = styled.div`
@@ -188,9 +183,15 @@ const Day = styled.div<{ isToday?: boolean }>`
   }
 `
 
-const Footer = styled.div`
-  padding: 0.4rem;
+const FooterWrapper = styled.div`
+  flex: 1;
 
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 0.4rem;
+`
+const Footer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;

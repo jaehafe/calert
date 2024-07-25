@@ -14,7 +14,18 @@ const whileHoverEffect = {
 
 const MotionDiv = forwardRef<HTMLDivElement, MotionDivProps>(({ children, ...props }, ref) => {
   return (
-    <motion.div whileTap={{ scale: 0.98 }} transition={{ duration: 0.1 }} ref={ref} {...props}>
+    <motion.div
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.1 }}
+      ref={ref}
+      {...props}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center'
+      }}
+    >
       {children}
     </motion.div>
   )
