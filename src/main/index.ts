@@ -4,9 +4,12 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import TrayIcon from '../../resources/claude.png?asset'
 
+let mainWindow: BrowserWindow | null = null
+let tray: Tray | null = null
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -16,10 +19,6 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -36,7 +35,12 @@ function createWindow(): void {
   }
 }
 
-let tray: Tray | null = null
+function showWindow() {
+  if (mainWindow === null) {
+    createWindow()
+  }
+  mainWindow?.show()
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -55,23 +59,19 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-
   const trayIconImage = nativeImage.createFromPath(TrayIcon)
   const resizedTrayIcon = trayIconImage.resize({ width: 16, height: 16 })
   tray = new Tray(resizedTrayIcon)
 
   const contextMenu = Menu.buildFromTemplate([
+    { label: '환경설정', click: () => showWindow() },
+    { type: 'separator' },
     { label: 'Item1', type: 'radio' },
     { label: 'Item2', type: 'radio' },
     { label: 'Item3', type: 'radio', checked: true },
-    { label: 'Item4', type: 'radio' }
+    { label: 'Item4', type: 'radio' },
+    { type: 'separator' },
+    { label: '종료', click: () => app.quit() }
   ])
   tray.setToolTip('This is my application.')
   tray.setContextMenu(contextMenu)
@@ -84,10 +84,12 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
 
-  if (tray) {
-    tray.destroy()
-  }
+app.on('activate', function () {
+  // On macOS it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (BrowserWindow.getAllWindows().length === 0) showWindow()
 })
 
 // In this file you can include the rest of your app"s specific main process
