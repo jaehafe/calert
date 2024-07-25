@@ -6,6 +6,7 @@ import TrayIcon from '../../resources/claude.png?asset'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
+let calendarWindow: BrowserWindow | null = null
 
 function createWindow(): void {
   // Create the browser window.
@@ -63,18 +64,32 @@ app.whenReady().then(() => {
   const resizedTrayIcon = trayIconImage.resize({ width: 16, height: 16 })
   tray = new Tray(resizedTrayIcon)
 
-  const contextMenu = Menu.buildFromTemplate([
-    { label: '환경설정', click: () => showWindow() },
-    { type: 'separator' },
-    { label: 'Item1', type: 'radio' },
-    { label: 'Item2', type: 'radio' },
-    { label: 'Item3', type: 'radio', checked: true },
-    { label: 'Item4', type: 'radio' },
-    { type: 'separator' },
-    { label: '종료', click: () => app.quit() }
-  ])
-  tray.setToolTip('This is my application.')
-  tray.setContextMenu(contextMenu)
+  // const contextMenu = Menu.buildFromTemplate([
+  //   { label: '환경설정', click: () => showWindow() },
+  //   { type: 'separator' },
+  //   { label: 'Item1', type: 'radio' },
+  //   { label: 'Item2', type: 'radio' },
+  //   { label: 'Item3', type: 'radio', checked: true },
+  //   { label: 'Item4', type: 'radio' },
+  //   { type: 'separator' },
+  //   { label: '종료', click: () => app.quit() }
+  // ])
+  // tray.setToolTip('This is my application.')
+  // tray.setContextMenu(contextMenu)
+  tray.on('click', (event, bounds) => {
+    if (!calendarWindow) {
+      createCalendarWindow()
+    }
+    const { x, y } = bounds
+    const { height, width } = calendarWindow!.getBounds()
+    calendarWindow!.setBounds({
+      x: x - width / 2,
+      y: y,
+      height,
+      width
+    })
+    calendarWindow!.show()
+  })
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -94,3 +109,28 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+function createCalendarWindow(): void {
+  calendarWindow = new BrowserWindow({
+    width: 170,
+    height: 250,
+    show: false,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  })
+
+  if (process.env.NODE_ENV === 'development') {
+    calendarWindow.loadURL('http://localhost:5173')
+  } else {
+    calendarWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+
+  calendarWindow.on('blur', () => {
+    calendarWindow?.hide()
+  })
+}
