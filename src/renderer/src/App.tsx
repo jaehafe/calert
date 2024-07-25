@@ -8,7 +8,7 @@ import useCalendar from './hooks/useCalendar'
 import usePin from './hooks/usePin'
 
 import { MotionDiv, whileHoverEffect } from './components/ui/MotionHtml'
-import { Calendar, CalendarDays, ChevronLeft, ChevronRight, Cog, Pin, Plus } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Pin } from 'lucide-react'
 
 export default function App() {
   const {

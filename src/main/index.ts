@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+// import icon from '../../resources/icon.png?asset'
 import TrayIcon from '../../resources/claude.png?asset'
 
 let mainWindow: BrowserWindow | null = null
@@ -15,11 +15,12 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'linux' ? { TrayIcon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
-    }
+    },
+    icon: TrayIcon
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -59,6 +60,7 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  app.setAppLogsPath(TrayIcon)
 
   createTray()
 })
@@ -72,7 +74,7 @@ function createTray() {
 
   tray.setToolTip('Your Application Name')
 
-  tray.on('click', (event, bounds) => {
+  tray.on('click', (_, bounds) => {
     if (!calendarWindow) {
       createCalendarWindow()
     }
@@ -87,7 +89,7 @@ function createTray() {
     calendarWindow!.show()
   })
 
-  tray.on('right-click', (event, bounds) => {
+  tray.on('right-click', () => {
     tray?.popUpContextMenu(contextMenu)
   })
 }
