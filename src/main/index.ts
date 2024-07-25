@@ -1,7 +1,8 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import TrayIcon from '../../resources/claude.png?asset'
 
 function createWindow(): void {
   // Create the browser window.
@@ -35,6 +36,8 @@ function createWindow(): void {
   }
 }
 
+let tray: Tray | null = null
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -59,6 +62,19 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  const trayIconImage = nativeImage.createFromPath(TrayIcon)
+  const resizedTrayIcon = trayIconImage.resize({ width: 16, height: 16 })
+  tray = new Tray(resizedTrayIcon)
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Item1', type: 'radio' },
+    { label: 'Item2', type: 'radio' },
+    { label: 'Item3', type: 'radio', checked: true },
+    { label: 'Item4', type: 'radio' }
+  ])
+  tray.setToolTip('This is my application.')
+  tray.setContextMenu(contextMenu)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -67,6 +83,10 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+
+  if (tray) {
+    tray.destroy()
   }
 })
 
