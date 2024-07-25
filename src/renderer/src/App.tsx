@@ -1,6 +1,9 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
+import { MotionDiv, whileHoverEffect } from './components/ui/MotionHtml'
+import { Calendar, CalendarDays, ChevronLeft, ChevronRight, Cog, Pin, Plus } from 'lucide-react'
+import theme from './styles/theme'
 
 export default function App() {
   const [currentDate, setCurrentDate] = useState(dayjs())
@@ -55,18 +58,54 @@ export default function App() {
 
   return (
     <CalendarContainer>
+      {/* header */}
       <CalendarHeader>
         <MonthYear>{currentDate.format('MMM YYYY')}</MonthYear>
-        <Button onClick={prevMonth}>&lt;</Button>
-        <Button onClick={moveToToday}>*</Button>
-        <Button onClick={nextMonth}>&gt;</Button>
+        <HeaderRight>
+          <MotionDiv
+            style={{ cursor: 'default' }}
+            whileHover={whileHoverEffect}
+            onClick={prevMonth}
+          >
+            <ChevronLeft width={16} height={16} />
+          </MotionDiv>
+          <MotionDiv
+            style={{ cursor: 'default' }}
+            whileHover={whileHoverEffect}
+            onClick={moveToToday}
+          >
+            <Calendar width={13} height={13} />
+          </MotionDiv>
+          <MotionDiv
+            style={{ cursor: 'default' }}
+            whileHover={whileHoverEffect}
+            onClick={nextMonth}
+          >
+            <ChevronRight width={16} height={16} />
+          </MotionDiv>
+        </HeaderRight>
       </CalendarHeader>
+
+      {/* 요알 */}
       <WeekDays>
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
           <WeekDay key={day}>{day}</WeekDay>
         ))}
       </WeekDays>
+
+      {/* 날짜 */}
       <DaysGrid>{renderCalendar()}</DaysGrid>
+
+      <Footer>
+        <MotionDiv>
+          <Plus width={16} height={16} color={theme.colors.colorTextTertiary} />
+        </MotionDiv>
+        <FooterRight>
+          <Pin width={16} height={16} color={theme.colors.colorTextTertiary} />
+          <CalendarDays width={16} height={16} color={theme.colors.colorTextTertiary} />
+          <Cog width={16} height={16} color={theme.colors.colorTextTertiary} />
+        </FooterRight>
+      </Footer>
     </CalendarContainer>
   )
 }
@@ -80,7 +119,7 @@ const CalendarContainer = styled.div`
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  background-color: rgba(18, 18, 18, 0.95);
+  background-color: rgba(40, 40, 40, 0.95);
   color: rgba(255, 255, 255, 0.87);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `
@@ -89,22 +128,15 @@ const CalendarHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   padding: 5px;
   background-color: rgba(20, 30, 10, 0.95);
 `
 
-const Button = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0 5px;
-  color: rgba(255, 255, 255, 0.87);
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: rgba(255, 255, 255, 1);
-  }
+const HeaderRight = styled.div`
+  display: flex;
+  gap: 4px;
+  align-items: center;
 `
 
 const MonthYear = styled.div`
@@ -130,19 +162,19 @@ const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: 1fr;
-  flex-grow: 1;
-  background-color: rgba(25, 25, 25, 0.95);
+  background-color: rgba(40, 40, 40, 0.95);
 `
 
 const Day = styled.div<{ isToday?: boolean }>`
-  margin: 2px;
+  /* margin: 2px;
+  padding: 4px; */
   padding: 4px;
 
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   color: ${({ isToday }) => (isToday ? 'white' : 'rgba(255, 255, 255, 0.87)')};
   border: 1px solid ${({ isToday }) => (isToday ? 'white' : 'none')};
   border-radius: 0.8rem;
@@ -154,4 +186,18 @@ const Day = styled.div<{ isToday?: boolean }>`
     background-color: ${({ isToday }) =>
       isToday ? 'rgba(0, 123, 255, 0.9)' : 'rgba(255, 255, 255, 0.1)'};
   }
+`
+
+const Footer = styled.div`
+  padding: 0.4rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const FooterRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 `
