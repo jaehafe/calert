@@ -116,7 +116,7 @@ function createCalendarWindow(): void {
     height: 200,
     maxWidth: 180,
     minHeight: 200,
-    maxHeight: 400,
+    maxHeight: 320,
     show: false,
     frame: false,
     resizable: false,
